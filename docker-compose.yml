@@ -1,0 +1,14 @@
+services:
+  
+  post-processor-dash:
+    env_file:
+      - dev.env
+    image: pennsieve/post-processor-dash
+    volumes:
+      - ./data:/service/data
+    container_name: post-processor-dash
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8050:8050"
