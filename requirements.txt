@@ -1,0 +1,7 @@
+dash
+pandas
+numpy
+plotly-express
+flask
+flask-restful
+boto3
