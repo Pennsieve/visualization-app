@@ -17,22 +17,22 @@ app = Dash(server=server)
 api = Api(server)
 api.add_resource(HealthCheck, '/health')
 
-src = os.environ['OUTPUT_DIR']
-df = pd.read_csv(f'{src}/gapminder_unfiltered.csv')
+# src = os.environ['OUTPUT_DIR']
+# df = pd.read_csv(f'{src}/gapminder_unfiltered.csv')
 
 app.layout = html.Div([
-    html.H1(children='Visualization App', style={'textAlign':'center'}),
-    dcc.Dropdown(df.country.unique(), 'Zimbabwe', id='dropdown-selection'),
-    dcc.Graph(id='graph-content')
+    html.H1(children='Visualization Application', style={'textAlign':'center'})
+    # dcc.Dropdown(df.country.unique(), 'Zimbabwe', id='dropdown-selection'),
+    # dcc.Graph(id='graph-content')
 ])
 
-@callback(
-    Output('graph-content', 'figure'),
-    Input('dropdown-selection', 'value')
-)
-def update_graph(value):
-    dff = df[df.country==value]
-    return px.line(dff, x='year', y='pop')
+# @callback(
+#     Output('graph-content', 'figure'),
+#     Input('dropdown-selection', 'value')
+# )
+# def update_graph(value):
+#     dff = df[df.country==value]
+#     return px.line(dff, x='year', y='pop')
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8050)
