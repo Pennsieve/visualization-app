@@ -1,17 +1,24 @@
 # Visualization App
 
-Ensure that your main file makes use of the INPUT_DIR and the OUTPUT_DIR ENVIRONMENT variables, to access input files and to write output.
+To build:
 
-Add additional dependencies to the Dockerfile.
+`docker-compose --progress plain build --no-cache`
 
-To run locally:
+## Releasing a new version
 
-Run: docker-compose up --build
+1. Merge updates into the main branch
+2. Create a new tag in main and name the tag: x.x.x following [semantic versioning](https://semver.org/).
 
-The above will create a data directory in your root directory locally.
+    e.g ```git tag -a 0.0.1 -m "Initial release"```
 
-The example copies files from the INPUT_DIR directory to the OUTPUT_DIR directory. The directories are set in dev.env and are defaulted to /service/data/input and /service/data/ouput for the input and output directories respectively. To test, create input and output subfolders in the data directory. Create a test file (for example test.txt) in the /service/data/input directory.
+    Given a version number MAJOR.MINOR.PATCH, increment the:
 
-Re-Run: docker-compose up --build
+    - MAJOR version when you make incompatible API changes,
+    - MINOR version when you add functionality in a backwards compatible manner, and
+    - PATCH version when you make backwards compatible bug fixes.
 
-The testfile should be copied to the data/output directory.
+3. Push the tag to GitHub
+
+    eg. ```git push origin 0.0.1```
+    
+This will trigger Github Actions to create a new release with the same name.
