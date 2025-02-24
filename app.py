@@ -17,12 +17,12 @@ app = Dash(server=server)
 api = Api(server)
 api.add_resource(HealthCheck, '/health')
 
-src = os.environ['INPUT_DIR']
+src = os.environ['OUTPUT_DIR']
 df = pd.read_csv(f'{src}/gapminder_unfiltered.csv')
 
 app.layout = html.Div([
     html.H1(children='Visualization App', style={'textAlign':'center'}),
-    dcc.Dropdown(df.country.unique(), 'Canada', id='dropdown-selection'),
+    dcc.Dropdown(df.country.unique(), 'Zimbabwe', id='dropdown-selection'),
     dcc.Graph(id='graph-content')
 ])
 

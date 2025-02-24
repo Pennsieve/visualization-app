@@ -1,12 +1,12 @@
 services:
   
-  post-processor-dash:
+  visualization-app:
     env_file:
       - dev.env
-    image: pennsieve/post-processor-dash
+    image: pennsieve/visualization-app
     volumes:
       - ./data:/service/data
-    container_name: post-processor-dash
+    container_name: visualization-app
     build:
       context: .
       dockerfile: ./Dockerfile
