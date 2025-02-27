@@ -1,11 +1,14 @@
 import io
 import os
 
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import Dash, html
+from dash import dcc
 import plotly.express as px
 import pandas as pd
 from flask import Flask
 from flask_restful import Resource, Api
+from dash import html
+from dash import Input, Output
 # import boto3
 
 class HealthCheck(Resource):
@@ -17,22 +20,34 @@ app = Dash(server=server)
 api = Api(server)
 api.add_resource(HealthCheck, '/health')
 
-# src = os.environ['OUTPUT_DIR']
-# df = pd.read_csv(f'{src}/gapminder_unfiltered.csv')
+src = os.environ['OUTPUT_DIR']
+all_items = os.listdir(src)
 
-app.layout = html.Div([
-    html.H1(children='Visualization Application', style={'textAlign':'center'})
-    # dcc.Dropdown(df.country.unique(), 'Zimbabwe', id='dropdown-selection'),
-    # dcc.Graph(id='graph-content')
-])
+# Filter out only directories
+folders = [item for item in all_items if os.path.isdir(os.path.join(src, item))]
+folders.append(".")
+controls = [
+    dcc.Dropdown(
+        id="dropdown",
+        options=[{"label": x, "value": x} for x in folders],
+        value=folders[0],
+    )
+]
 
-# @callback(
-#     Output('graph-content', 'figure'),
-#     Input('dropdown-selection', 'value')
-# )
-# def update_graph(value):
-#     dff = df[df.country==value]
-#     return px.line(dff, x='year', y='pop')
+app.layout = html.Div(
+    [html.H1("File Browser"), html.Div(controls), html.Div(id="folder-files")]
+)
+
+@app.callback(Output("folder-files", "children"), Input("dropdown", "value"))
+def list_all_files(folder_name):
+    # This is relative, but you should be able
+    # able to provide the absolute path too
+    print(folder_name)
+    file_names = os.listdir(f'{src}/{folder_name}')
+
+    file_list = html.Ul([html.Li(file) for file in file_names])
+
+    return file_list
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8050)
