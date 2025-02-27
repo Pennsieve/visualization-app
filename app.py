@@ -20,7 +20,7 @@ app = Dash(server=server)
 api = Api(server)
 api.add_resource(HealthCheck, '/health')
 
-src = os.environ['OUTPUT_DIR']
+src = f'{os.environ['BASE_DIR']}/output'
 all_items = os.listdir(src)
 
 # Filter out only directories
