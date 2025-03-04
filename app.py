@@ -24,18 +24,16 @@ api = Api(server)
 api.add_resource(HealthCheck, '/health')
 
 src = f'{os.environ['BASE_DIR']}/output'
-# all_items = os.listdir(src)
 
-all_items2 = []
+dir_items = []
 for file_name in os.listdir(src):
     full_path = os.path.join(src, file_name)
-    all_items2.append(full_path)
+    dir_items.append(full_path)
 
-app.logger.info(all_items2)
-
+app.logger.info(dir_items)
 
 # Filter out only directories
-folders = [item for item in all_items2 if os.path.isdir(os.path.join(src, item))]
+folders = [item for item in dir_items if os.path.isdir(os.path.join(src, item))]
 folders.append(src)
 
 controls = [
@@ -46,7 +44,6 @@ controls = [
     )
 ]
 
-df = pd.read_csv(f'{os.environ['BASE_DIR']}/output/gapminder2007.csv') # test
 app.layout = [
     dbc.Row([
         html.Div('File Browser', className="text-primary text-center fs-3")
@@ -64,33 +61,10 @@ app.layout = [
 
     dbc.Row([
         html.Div(children=[dash_table.DataTable(data=[], page_size=10, id='file-viewer')])
-    ]),
-
-    dbc.Row([
-        html.Div(children=[
-        dcc.RadioItems(options=['pop', 'lifeExp', 'gdpPercap'],
-                        value='lifeExp',
-                       inline=True,
-                       id='controls-and-radio-item')
-        ])
-    ]),
-
-    dbc.Row([
-        dcc.Graph(figure={}, id='controls-and-graph')
     ])
 ]
 
-
-# Add controls to build the interaction - Demo
-@app.callback(
-    Output(component_id='controls-and-graph', component_property='figure'),
-    Input(component_id='controls-and-radio-item', component_property='value')
-)
-def update_graph(input_chosen):
-    fig = px.histogram(df, x='continent', y=input_chosen, histfunc='avg')
-    return fig
-
-# Real world example
+# List files based on drop-down selection
 @app.callback(
         Output("files-controls-and-radio-item", "options"),
          Output("files-controls-and-radio-item", "value"),
@@ -104,7 +78,7 @@ def list_all_files(folder_name):
 
     return file_names, file_names[0]
 
-# control to view csv file when selected
+# View selected file (e.g. csv)
 @app.callback(
     Output(component_id='file-viewer', component_property='data'),
     Input("files-controls-and-radio-item", "value")
@@ -115,6 +89,6 @@ def update_viewer(input_chosen):
         return df.to_dict('records')
     else:
         return []
-
+    
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8050)
