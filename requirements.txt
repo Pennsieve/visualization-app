@@ -4,4 +4,4 @@ numpy
 plotly-express
 flask
 flask-restful
-boto3
+dash-bootstrap-components
