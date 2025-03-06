@@ -2,14 +2,11 @@ import io
 import os
 import dash
 
-from dash import Dash, html, dash_table, callback
+from dash import html, dash_table
 from dash import dcc
 import plotly.express as px
 import pandas as pd
-from flask import Flask
-from flask_restful import Resource, Api
 from dash import html
-from dash import Input, Output
 import dash_bootstrap_components as dbc
 
 dash.register_page(__name__, path_template='/filebrowser/<workflowInstanceUuid>')

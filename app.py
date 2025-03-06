@@ -1,8 +1,7 @@
 import io
 import os
 
-from dash import Dash, html, dash_table
-from dash import dcc
+from dash import Dash, html
 import plotly.express as px
 import pandas as pd
 from flask import Flask
@@ -20,7 +19,10 @@ server = Flask('visualization_app')
 # Initialize the app - incorporate css
 external_stylesheets = [dbc.themes.CERULEAN]
 
-app = Dash(server=server, external_stylesheets=external_stylesheets, use_pages=True, suppress_callback_exceptions=True)
+app = Dash(server=server,
+            external_stylesheets=external_stylesheets,
+              use_pages=True,
+                suppress_callback_exceptions=True)
 api = Api(server)
 api.add_resource(HealthCheck, '/health')
 
@@ -34,7 +36,8 @@ app.layout = html.Div([
         Output("files-controls-and-radio-item", "value"),
         Input("dropdown", "value"))
 def list_all_files(folder_name):
-    # logger.info(folder_name)
+    if folder_name is None:
+        return [], ""
     file_names = []
     for file_name in os.listdir(folder_name):
         full_path = os.path.join(folder_name, file_name)
