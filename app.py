@@ -10,10 +10,49 @@ from dash import html
 from dash import Input, Output
 import dash_bootstrap_components as dbc
 import dash
+from boto3 import client as boto3_client
 
 class HealthCheck(Resource):
     def get(self):
         return {'up': 'OK'}
+    
+class StartTask(Resource):
+    def post(self, workflowInstanceUuid):
+        task_arn, container_task_arn = start_task()
+        return {'workflowInstanceUuid': workflowInstanceUuid, 'task_arn': task_arn, 'container_task_arn': container_task_arn}
+
+def start_task():
+    isLocal = os.environ['IS_LOCAL']
+    if isLocal == 'true':
+        return "local-task-arn","container/task-arn/local"
+    
+    ecs_client = boto3_client("ecs",  os.environ['REGION'])
+    response = ecs_client.run_task(
+        cluster = os.environ['CLUSTER_NAME'],
+        launchType = 'FARGATE',
+        taskDefinition=os.environ['TASK_DEFINITION_NAME'],
+        count = 1,
+        platformVersion='LATEST',
+        networkConfiguration={
+            'awsvpcConfiguration': {
+                'subnets': os.environ['SUBNET_IDS'].split(","),
+                'assignPublicIp': 'ENABLED',
+                'securityGroups': [os.environ['SECURITY_GROUP_ID']]
+                }   
+        },
+        overrides={
+            'containerOverrides': [
+                {
+                    'name': os.environ['CONTAINER_NAME'],
+                    'environment': os.environ['ENVIRONMENT'],
+                },
+            ],
+    })
+
+    task_arn = response['tasks'][0]['taskArn']
+    container_task_arn = response['tasks'][0]['containers'][0]['taskArn']
+
+    return task_arn, container_task_arn 
 
 server = Flask('visualization_app')
 # Initialize the app - incorporate css
@@ -25,6 +64,7 @@ app = Dash(server=server,
                 suppress_callback_exceptions=True)
 api = Api(server)
 api.add_resource(HealthCheck, '/health')
+api.add_resource(StartTask, '/start-task/<workflowInstanceUuid>')
 
 app.layout = html.Div([
     dash.page_container
