@@ -16,43 +16,23 @@ class HealthCheck(Resource):
     def get(self):
         return {'up': 'OK'}
     
-class StartTask(Resource):
+class StopInstance(Resource):
     def post(self, workflowInstanceUuid):
-        task_arn, container_task_arn = start_task()
-        return {'workflowInstanceUuid': workflowInstanceUuid, 'task_arn': task_arn, 'container_task_arn': container_task_arn}
+        response = stop_instance(workflowInstanceUuid)
+        return response
 
-def start_task():
+def stop_instance(workflowInstanceUuid):
     isLocal = os.environ['IS_LOCAL']
     if isLocal == 'true':
-        return "local-task-arn","container/task-arn/local"
-    
-    ecs_client = boto3_client("ecs",  os.environ['REGION'])
-    response = ecs_client.run_task(
-        cluster = os.environ['CLUSTER_NAME'],
-        launchType = 'FARGATE',
-        taskDefinition=os.environ['TASK_DEFINITION_NAME'],
-        count = 1,
-        platformVersion='LATEST',
-        networkConfiguration={
-            'awsvpcConfiguration': {
-                'subnets': os.environ['SUBNET_IDS'].split(","),
-                'assignPublicIp': 'ENABLED',
-                'securityGroups': [os.environ['SECURITY_GROUP_ID']]
-                }   
-        },
-        overrides={
-            'containerOverrides': [
-                {
-                    'name': os.environ['CONTAINER_NAME'],
-                    'environment': os.environ['ENVIRONMENT'],
-                },
-            ],
-    })
+        return {}
 
-    task_arn = response['tasks'][0]['taskArn']
-    container_task_arn = response['tasks'][0]['containers'][0]['taskArn']
-
-    return task_arn, container_task_arn 
+    print(f'stopping serving requests for: {workflowInstanceUuid}')
+    ecs_client = boto3_client("ecs", region_name=os.environ['REGION'])
+    return ecs_client.update_service(
+        cluster=os.environ['CLUSTER_NAME'],
+        service=os.environ['CONTAINER_NAME'],
+        desiredCount=0
+    )
 
 server = Flask('visualization_app')
 # Initialize the app - incorporate css
@@ -64,7 +44,7 @@ app = Dash(server=server,
                 suppress_callback_exceptions=True)
 api = Api(server)
 api.add_resource(HealthCheck, '/health')
-api.add_resource(StartTask, '/start-task/<workflowInstanceUuid>')
+api.add_resource(StopInstance, '/<workflowInstanceUuid>/stop')
 
 app.layout = html.Div([
     dash.page_container
