@@ -19,7 +19,10 @@ class HealthCheck(Resource):
 class StopInstance(Resource):
     def post(self, workflowInstanceUuid):
         response = stop_instance(workflowInstanceUuid)
-        return response
+        return {
+            'uuid': workflowInstanceUuid,
+            'status': response['service']['status'],
+        }
 
 def stop_instance(workflowInstanceUuid):
     print(f'stopping serving requests for: {workflowInstanceUuid}')
