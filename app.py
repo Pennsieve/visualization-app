@@ -22,10 +22,6 @@ class StopInstance(Resource):
         return response
 
 def stop_instance(workflowInstanceUuid):
-    isLocal = os.environ['IS_LOCAL']
-    if isLocal == 'true':
-        return {}
-
     print(f'stopping serving requests for: {workflowInstanceUuid}')
     ecs_client = boto3_client("ecs", region_name=os.environ['REGION'])
     return ecs_client.update_service(
