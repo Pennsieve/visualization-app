@@ -5,3 +5,4 @@ plotly-express
 flask
 flask-restful
 dash-bootstrap-components
+boto3
