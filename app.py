@@ -16,15 +16,16 @@ class HealthCheck(Resource):
     def get(self):
         return {'up': 'OK'}
     
-class StopInstance(Resource):
+class StopServingInstance(Resource):
     def post(self, workflowInstanceUuid):
-        response = stop_instance(workflowInstanceUuid)
+        response = stop_serving_instance(workflowInstanceUuid)
         return {
             'uuid': workflowInstanceUuid,
-            'status': response['service']['status'],
+            'previousStatus': response['service']['status'],
+            'previousRunningCount': response['service']['runningCount']
         }
 
-def stop_instance(workflowInstanceUuid):
+def stop_serving_instance(workflowInstanceUuid):
     print(f'stopping serving requests for: {workflowInstanceUuid}')
     ecs_client = boto3_client("ecs", region_name=os.environ['REGION'])
     return ecs_client.update_service(
@@ -43,7 +44,7 @@ app = Dash(server=server,
                 suppress_callback_exceptions=True)
 api = Api(server)
 api.add_resource(HealthCheck, '/health')
-api.add_resource(StopInstance, '/<workflowInstanceUuid>/stop')
+api.add_resource(StopServingInstance, '/<workflowInstanceUuid>/stop')
 
 app.layout = html.Div([
     dash.page_container
