@@ -19,14 +19,24 @@ class HealthCheck(Resource):
 class StopServingInstance(Resource):
     def post(self, workflowInstanceUuid):
         response = stop_serving_instance(workflowInstanceUuid)
-        return {
+        payload = {
             'uuid': workflowInstanceUuid,
             'previousStatus': response['service']['status'],
             'previousRunningCount': response['service']['runningCount']
         }
+        return payload, 202
 
 def stop_serving_instance(workflowInstanceUuid):
     print(f'stopping serving requests for: {workflowInstanceUuid}')
+    value = os.getenv('IS_LOCAL')
+    if value is not None and value == "true":
+        return {
+            'service':{
+                'status': 'ACTIVE',
+                'runningCount': 1,
+            }
+        }
+    
     ecs_client = boto3_client("ecs", region_name=os.environ['REGION'])
     return ecs_client.update_service(
         cluster=os.environ['CLUSTER_NAME'],
